@@ -2,14 +2,16 @@ import { useState, type FormEvent } from "react";
 import { useAuth } from "../context/AuthContext";
 
 export function LoginPage() {
-  const { requestLogin, isMockMode } = useAuth();
+  const { requestLogin, verifyCode, isMockMode } = useAuth();
+  const [step, setStep] = useState<"email" | "code">("email");
   const [email, setEmail] = useState("");
+  const [code, setCode] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<{ type: "error" | "success"; text: string } | null>(
     null,
   );
 
-  const handleSubmit = async (event: FormEvent) => {
+  const handleRequestCode = async (event: FormEvent) => {
     event.preventDefault();
     if (!email.trim()) return;
     setSubmitting(true);
@@ -20,11 +22,24 @@ export function LoginPage() {
       setMessage({ type: "error", text: result.error });
       return;
     }
-    if (result.sentMagicLink) {
+    if (result.codeSent) {
+      setStep("code");
       setMessage({
         type: "success",
-        text: "로그인 링크를 이메일로 보냈어요. 메일함을 확인해 주세요.",
+        text: "인증코드를 이메일로 보냈어요. 메일함에서 6자리 코드를 확인해 주세요.",
       });
+    }
+  };
+
+  const handleVerifyCode = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!code.trim()) return;
+    setSubmitting(true);
+    setMessage(null);
+    const result = await verifyCode(email.trim(), code.trim());
+    setSubmitting(false);
+    if (result.error) {
+      setMessage({ type: "error", text: result.error });
     }
   };
 
@@ -35,29 +50,68 @@ export function LoginPage() {
         내가 입은 코디 사진을 태그로 정리하고, 태그 선택만으로 다시 찾아보는 개인용 아카이브예요.
       </p>
 
-      <form onSubmit={handleSubmit}>
-        <div className="field">
-          <label htmlFor="login-email">이메일</label>
-          <input
-            id="login-email"
-            type="email"
-            inputMode="email"
-            autoComplete="email"
-            placeholder="you@example.com"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            required
-          />
-        </div>
-        {message && (
-          <div className={`status-banner ${message.type === "error" ? "error" : "success"}`}>
-            {message.text}
+      {step === "email" && (
+        <form onSubmit={handleRequestCode}>
+          <div className="field">
+            <label htmlFor="login-email">이메일</label>
+            <input
+              id="login-email"
+              type="email"
+              inputMode="email"
+              autoComplete="email"
+              placeholder="you@example.com"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              required
+            />
           </div>
-        )}
-        <button type="submit" className="btn btn-primary btn-block" disabled={submitting}>
-          {submitting ? "처리 중..." : "로그인"}
-        </button>
-      </form>
+          {message && (
+            <div className={`status-banner ${message.type === "error" ? "error" : "success"}`}>
+              {message.text}
+            </div>
+          )}
+          <button type="submit" className="btn btn-primary btn-block" disabled={submitting}>
+            {submitting ? "처리 중..." : isMockMode ? "로그인" : "인증코드 받기"}
+          </button>
+        </form>
+      )}
+
+      {step === "code" && (
+        <form onSubmit={handleVerifyCode}>
+          <div className="field">
+            <label htmlFor="login-code">인증코드 (6자리)</label>
+            <input
+              id="login-code"
+              type="text"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              placeholder="123456"
+              value={code}
+              onChange={(event) => setCode(event.target.value)}
+              required
+            />
+          </div>
+          {message && (
+            <div className={`status-banner ${message.type === "error" ? "error" : "success"}`}>
+              {message.text}
+            </div>
+          )}
+          <button type="submit" className="btn btn-primary btn-block" disabled={submitting}>
+            {submitting ? "확인 중..." : "로그인"}
+          </button>
+          <button
+            type="button"
+            className="btn-text btn-block"
+            onClick={() => {
+              setStep("email");
+              setCode("");
+              setMessage(null);
+            }}
+          >
+            이메일 다시 입력하기
+          </button>
+        </form>
+      )}
 
       <p className="login-hint">
         같은 이메일로 로그인하면 새 폰에서도 저장한 코디 사진을 다시 볼 수 있어요.

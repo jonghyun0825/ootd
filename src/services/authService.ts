@@ -55,6 +55,7 @@ export function subscribeToAuthChanges(callback: (user: AppUser | null) => void)
 export type SignInResult = {
   error?: string;
   mockUser?: AppUser;
+  codeSent?: boolean;
 };
 
 export async function signInWithEmail(email: string): Promise<SignInResult> {
@@ -68,11 +69,18 @@ export async function signInWithEmail(email: string): Promise<SignInResult> {
     return { mockUser };
   }
 
-  const redirectTo = `${window.location.origin}${import.meta.env.BASE_URL}`;
-  const { error } = await supabase.auth.signInWithOtp({
-    email,
-    options: { emailRedirectTo: redirectTo },
-  });
+  // 이메일로 6자리 인증코드를 보낸다. 링크 방식과 달리 요청한 브라우저가 아니어도
+  // (예: 다른 기기에서 메일 확인) 코드만 입력하면 되므로 기기/브라우저에 영향을 받지 않는다.
+  const { error } = await supabase.auth.signInWithOtp({ email });
+  if (error) return { error: error.message };
+  return { codeSent: true };
+}
+
+export async function verifyEmailCode(email: string, token: string): Promise<{ error?: string }> {
+  if (!supabase) {
+    return { error: "Supabase가 설정되지 않았습니다." };
+  }
+  const { error } = await supabase.auth.verifyOtp({ email, token, type: "email" });
   if (error) return { error: error.message };
   return {};
 }

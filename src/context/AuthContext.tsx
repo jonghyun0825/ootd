@@ -5,16 +5,19 @@ import {
   signInWithEmail,
   signOut,
   subscribeToAuthChanges,
+  verifyEmailCode,
 } from "../services/authService";
 import { isSupabaseConfigured } from "../services/supabaseClient";
 
-type LoginOutcome = { error?: string; sentMagicLink?: boolean };
+type LoginOutcome = { error?: string; codeSent?: boolean };
+type VerifyOutcome = { error?: string };
 
 type AuthContextValue = {
   user: AppUser | null;
   loading: boolean;
   isMockMode: boolean;
   requestLogin: (email: string) => Promise<LoginOutcome>;
+  verifyCode: (email: string, code: string) => Promise<VerifyOutcome>;
   logout: () => Promise<void>;
 };
 
@@ -45,9 +48,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (result.error) return { error: result.error };
     if (result.mockUser) {
       setUser(result.mockUser);
-      return { sentMagicLink: false };
+      return {};
     }
-    return { sentMagicLink: true };
+    return { codeSent: true };
+  };
+
+  const verifyCode = async (email: string, code: string): Promise<VerifyOutcome> => {
+    const result = await verifyEmailCode(email, code);
+    if (result.error) return { error: result.error };
+    const current = await getCurrentUser();
+    setUser(current);
+    return {};
   };
 
   const logout = async () => {
@@ -57,7 +68,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, loading, isMockMode: !isSupabaseConfigured, requestLogin, logout }}
+      value={{
+        user,
+        loading,
+        isMockMode: !isSupabaseConfigured,
+        requestLogin,
+        verifyCode,
+        logout,
+      }}
     >
       {children}
     </AuthContext.Provider>
