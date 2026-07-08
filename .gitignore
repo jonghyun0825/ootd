@@ -17,6 +17,9 @@ dist-ssr
 .env.*
 !.env.example
 
+# Claude Code 세션 내부 파일
+.claude/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
