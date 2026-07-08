@@ -68,9 +68,10 @@ export async function signInWithEmail(email: string): Promise<SignInResult> {
     return { mockUser };
   }
 
+  const redirectTo = `${window.location.origin}${import.meta.env.BASE_URL}`;
   const { error } = await supabase.auth.signInWithOtp({
     email,
-    options: { emailRedirectTo: window.location.href },
+    options: { emailRedirectTo: redirectTo },
   });
   if (error) return { error: error.message };
   return {};
