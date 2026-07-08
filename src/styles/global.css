@@ -347,25 +347,40 @@ a {
 /* Upload preview cards */
 .upload-card {
   display: flex;
-  gap: 12px;
-  align-items: flex-start;
+  flex-direction: column;
+}
+
+.upload-card__photo-wrap {
+  position: relative;
+  width: 100%;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--color-accent-bg);
 }
 
 .upload-card__thumb {
-  width: 84px;
-  height: 100px;
-  object-fit: cover;
-  border-radius: var(--radius-md);
+  display: block;
+  width: 100%;
+  max-height: 62vh;
+  object-fit: contain;
   background: var(--color-accent-bg);
-  flex-shrink: 0;
 }
 
 .upload-card__remove {
-  color: var(--color-danger);
-  background: none;
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  color: #fff;
+  background: rgba(20, 18, 16, 0.6);
   border: none;
+  border-radius: 999px;
   font-size: 13px;
-  padding: 8px 0;
+  padding: 8px 14px;
+  min-height: 0;
+}
+
+.upload-card__status {
+  margin-top: 10px;
 }
 
 .section-toggle {
@@ -433,10 +448,11 @@ a {
 }
 
 .detail-photo {
+  display: block;
   width: 100%;
+  max-height: 70vh;
   border-radius: var(--radius-lg);
-  aspect-ratio: 4 / 5;
-  object-fit: cover;
+  object-fit: contain;
   background: var(--color-accent-bg);
   margin-bottom: 16px;
 }

@@ -11,23 +11,27 @@ export function UploadPhotoCard({ draft, onChange, onRemove }: UploadPhotoCardPr
   return (
     <div className="card">
       <div className="upload-card">
-        <img className="upload-card__thumb" src={draft.previewUrl} alt="선택한 사진 미리보기" />
-        <div style={{ flex: 1 }}>
-          {draft.status === "uploading" && (
-            <div className="status-banner">저장 중...</div>
-          )}
-          {draft.status === "error" && (
-            <div className="status-banner error">
-              {draft.errorMessage ?? "저장에 실패했어요. 다시 시도해 주세요."}
-            </div>
-          )}
-          {draft.status === "success" && (
-            <div className="status-banner success">저장 완료</div>
-          )}
+        <div className="upload-card__photo-wrap">
+          <img className="upload-card__thumb" src={draft.previewUrl} alt="선택한 사진 미리보기" />
           <button type="button" className="upload-card__remove" onClick={onRemove}>
             사진 제거
           </button>
         </div>
+        {draft.status !== "idle" && (
+          <div className="upload-card__status">
+            {draft.status === "uploading" && (
+              <div className="status-banner">저장 중...</div>
+            )}
+            {draft.status === "error" && (
+              <div className="status-banner error">
+                {draft.errorMessage ?? "저장에 실패했어요. 다시 시도해 주세요."}
+              </div>
+            )}
+            {draft.status === "success" && (
+              <div className="status-banner success">저장 완료</div>
+            )}
+          </div>
+        )}
       </div>
       <TagForm
         idPrefix={draft.localId}
