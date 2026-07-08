@@ -30,7 +30,8 @@ export function EditPage() {
   useEffect(() => {
     if (!photoId || !user) return;
     const cached = photos.find((p) => p.id === photoId);
-    const source = cached ? Promise.resolve(cached) : getPhoto(user.id, photoId);
+    const source =
+      cached && cached.imageUrl ? Promise.resolve(cached) : getPhoto(user.id, photoId);
     source.then((found) => {
       setPhoto(found);
       if (found) {

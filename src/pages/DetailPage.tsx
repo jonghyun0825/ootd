@@ -22,7 +22,7 @@ export function DetailPage() {
   useEffect(() => {
     if (!photoId || !user) return;
     const cached = photos.find((p) => p.id === photoId);
-    if (cached) {
+    if (cached && cached.imageUrl) {
       setPhoto(cached);
       return;
     }
